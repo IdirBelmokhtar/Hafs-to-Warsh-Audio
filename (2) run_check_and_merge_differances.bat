@@ -1,0 +1,2 @@
+php check_and_merge_differances.php
+pause

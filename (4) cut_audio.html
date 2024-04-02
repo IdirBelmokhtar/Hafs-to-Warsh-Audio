@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecteur Audio</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 50px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        audio {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        button {
+            display: block;
+            width: 100%;
+            padding: 10px;
+            margin: 10px auto;
+            border: none;
+            background-color: #007bff;
+            color: #fff;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        p {
+            text-align: center;
+            font-size: 14px;
+            color: #666;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Lecteur Audio</h1>
+        <audio id="audioPlayer" controls>
+            <source src="" type="audio/mpeg">
+            Votre navigateur ne prend pas en charge l'élément audio.
+        </audio>
+        <button onclick="loadNextAudio()">Suivant</button>
+        <button onclick="cutAudio()">Couper</button>
+        <p id="audioPath"></p>
+    </div>
+
+    <script>
+        var audioFiles = ["./All/1/6-7.mp3", "./All/106/4-5.mp3", "./All/11/85-86.mp3", "./All/13/17-18.mp3", "./All/13/5-6.mp3", "./All/14/1-2.mp3", "./All/14/11-12.mp3", "./All/14/6-7.mp3", "./All/18/22-23.mp3", "./All/19/40-41.mp3", "./All/19/75-76.mp3", "./All/2/253-254.mp3", "./All/20/120-121.mp3", "./All/20/129-130.mp3", "./All/20/38-39.mp3", "./All/20/84-85.mp3", "./All/20/87-88.mp3", "./All/23/45-46.mp3", "./All/26/48-49.mp3", "./All/27/33-34.mp3", "./All/27/45-46.mp3", "./All/28/22-23.mp3", "./All/29/28-29.mp3", "./All/3/3-4.mp3", "./All/3/91-92.mp3", "./All/30/2-3.mp3", "./All/32/9-10.mp3", "./All/35/43-44.mp3", "./All/39/3-4.mp3", "./All/40/17-18.mp3", "./All/43/51-52.mp3", "./All/47/4-5.mp3", "./All/5/1-2.mp3", "./All/5/16-17.mp3", "./All/55/33-34.mp3", "./All/56/10-11.mp3", "./All/56/43-44.mp3", "./All/56/8-9.mp3", "./All/6/1-2.mp3", "./All/6/162-163.mp3", "./All/67/9-10.mp3", "./All/7/136-137.mp3", "./All/7/36-37.mp3", "./All/71/23-24.mp3", "./All/71/26-27.mp3", "./All/8/42-43.mp3", "./All/89/15-16.mp3", "./All/89/17-18.mp3", "./All/89/25-26.mp3", "./All/9/70-71.mp3", "./All/96/15-16.mp3", "./All/99/6-7.mp3", ];
+        var currentIndex = 0;
+
+        var audioPlayer = document.getElementById("audioPlayer");
+        var audioPathElement = document.getElementById("audioPath");
+        var a, b;
+
+        function loadNextAudio() {
+            // Vérifie si nous sommes arrivés à la fin de la liste
+            if (currentIndex >= audioFiles.length) {
+                alert("Vous avez atteint la fin de la liste des fichiers audio.");
+                return;
+            }
+
+            // Charger le prochain fichier audio
+            audioPlayer.src = audioFiles[currentIndex];
+
+            // Mettre à jour le chemin du fichier audio affiché
+            audioPathElement.textContent = "Chemin du fichier audio : " + audioFiles[currentIndex];
+
+            // Extraire les valeurs a et b du nom du fichier
+            var match = audioFiles[currentIndex].match(/(\d+)-(\d+)\.mp3/);
+            if (match && match.length === 3) {
+                a = parseInt(match[1]);
+                b = parseInt(match[2]);
+            }
+
+            // Mettre à jour l'index pour le prochain fichier audio
+            currentIndex++;
+
+            // Démarrer la lecture
+            audioPlayer.play();
+        }
+
+        function cutAudio() {
+            // Vérifier si les variables a et b sont définies
+            if (typeof a === 'undefined' || typeof b === 'undefined') {
+                alert("Impossible de couper l'audio. Chargez d'abord un fichier audio.");
+                return;
+            }
+
+            // Obtenir la durée totale de l'audio
+            var duration = audioPlayer.duration;
+
+            // Obtenir le temps de début de la découpe (0 jusqu'au curseur)
+            var startTime = formatTime(audioPlayer.currentTime);
+
+            // Obtenir le temps de fin de la découpe (curseur jusqu'à la fin)
+            var endTime = formatTime(duration);
+
+            // Envoyer les données via POST
+            var xhr = new XMLHttpRequest();
+            xhr.open("POST", "traitement.php", true);
+            xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    alert(xhr.responseText);
+                }
+            };
+            var data = "input_file=" + encodeURIComponent(audioFiles[currentIndex - 1])
+                     + "&start_time=" + encodeURIComponent(startTime)
+                     + "&end_time=" + encodeURIComponent(endTime)
+                     + "&name_part_a=" + encodeURIComponent(a)
+                     + "&name_part_b=" + encodeURIComponent(b);
+            xhr.send(data);
+        }
+
+        function formatTime(time) {
+            var hours = Math.floor(time / 3600);
+            var minutes = Math.floor((time % 3600) / 60);
+            var seconds = Math.floor(time % 60);
+            return pad(hours) + ":" + pad(minutes) + ":" + pad(seconds);
+        }
+
+        function pad(num) {
+            return (num < 10 ? "0" : "") + num;
+        }
+    </script>
+</body>
+
+</html>

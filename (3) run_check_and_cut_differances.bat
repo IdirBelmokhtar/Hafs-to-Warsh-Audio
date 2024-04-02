@@ -1,0 +1,2 @@
+php check_and_cut_differances.php
+pause

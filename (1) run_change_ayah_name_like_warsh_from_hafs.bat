@@ -1,0 +1,2 @@
+php change_ayah_name_like_warsh_from_hafs.php
+pause
